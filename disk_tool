@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+
+target_disk=/dev/sda
+
+diskspace=$(( $(grep ${target_disk##*/}$ /proc/partitions | awk '{print $3}') * 2 / 2048 - 1 ))
+swapspace=$(( $(head -n1 /proc/meminfo | awk '{print $2}') / 1024 + 1 ))
+rootspace=$(( $diskspace - $swapspace ))
+
+sgdisk --clear --new 1:0:+${rootspace}MiB --new 2:0:+${swapspace}MiB --typecode 2:8200 ${dry_run:-'--pretend'} --print $target_disk
+
+
+
